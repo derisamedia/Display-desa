@@ -1,0 +1,10 @@
+{
+  "name": "portal-display-pelayanan",
+  "version": "1.0.0",
+  "description": "Portal Display Layanan Informasi Publik",
+  "scripts": {
+    "start": "node sync-media.js --serve",
+    "watch": "node sync-media.js",
+    "build": "node sync-media.js --once"
+  }
+}

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Display Layanan Informasi Digital • Galeri Foto & Video</title>
+  <meta name="description" content="Sistem display digital signage interaktif untuk penayangan foto dan video informasi layanan publik, instansi, pameran, dan TV lobby.">
+  <meta name="theme-color" content="#0b0f17">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-obsidian">
+
+  <!-- APP CONTAINER -->
+  <div id="app" class="app-container mode-slideshow fit-contain">
+
+    <!-- AMBIENT BACKGROUND GLOW (Reflects current photo/video with blur) -->
+    <div id="ambientBackdrop" class="ambient-backdrop">
+      <div id="ambientMedia" class="ambient-media"></div>
+      <div class="ambient-overlay"></div>
+    </div>
+
+    <!-- TOP HEADER BAR (Auto-hides in slideshow mode on idle) -->
+    <header id="topHeader" class="top-header auto-hud">
+      <div class="header-left">
+        <div class="brand-badge">
+          <div class="brand-pulse"></div>
+          <div class="brand-text">
+            <span class="brand-title">PORTAL DISPLAY LAYANAN</span>
+            <span class="brand-subtitle">Informasi Digital • Format Reels</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <!-- Live Clock & Date Widget -->
+        <div class="datetime-badge" id="dateTimeWidget" title="Waktu Nyata Display">
+          <div class="clock-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="datetime-info">
+            <span class="clock-time" id="clockTime">00:00:00 WIB</span>
+            <span class="clock-date" id="clockDate">Memuat Tanggal...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Aspect Ratio Quick Switcher -->
+        <div class="ratio-toggle-group" title="Ubah Rasio Tampilan">
+          <button id="btnRatioFull" class="ratio-btn active" data-ratio="full" title="Rasio Penuh Layar (Fullscreen Tanpa Frame Kosong)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            <span class="ratio-label">Fullscreen</span>
+          </button>
+          <button id="btnRatio916" class="ratio-btn" data-ratio="9:16" title="Rasio 9:16 (Format Video Reels / Vertikal)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/></svg>
+            <span class="ratio-label">9:16 Reels</span>
+          </button>
+          <button id="btnRatio169" class="ratio-btn" data-ratio="16:9" title="Rasio 16:9 (Layar Lebar / Lanskap TV)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+            <span class="ratio-label">16:9 TV</span>
+          </button>
+        </div>
+
+        <!-- Mode Switcher (Slideshow vs Grid) -->
+        <div class="view-toggle-group">
+          <button id="btnViewSlideshow" class="hud-btn active" title="Mode Display Layar (Slideshow)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="btn-label">Display</span>
+          </button>
+          <button id="btnViewGrid" class="hud-btn" title="Mode Galeri Grid">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span class="btn-label">Galeri</span>
+          </button>
+        </div>
+
+        <!-- Add Media Button -->
+        <button id="btnAddMedia" class="hud-btn action-add" title="Tambah Foto / Video Baru">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="btn-label">Tambah Media</span>
+        </button>
+
+        <!-- Settings Modal Button -->
+        <button id="btnOpenSettings" class="hud-btn hud-btn-icon" title="Pengaturan Tampilan Display">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+
+        <!-- Fullscreen Button -->
+        <button id="btnToggleFullscreen" class="hud-btn hud-btn-icon" title="Layar Penuh TV / Monitor (F11)">
+          <svg id="fsIconExpand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          <svg id="fsIconCompress" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN DISPLAY STAGE (100% Edge-to-Edge Fullscreen Display) -->
+    <main id="slideshowStage" class="slideshow-stage">
+
+      <!-- FULL BLEED DISPLAY FRAME (100% Fullscreen, no empty letterbox) -->
+      <div id="reelsFrame" class="reels-frame ratio-full">
+
+        <!-- Reels / Stories Segmented Progress Bar (Instagram / TikTok Style) -->
+        <div id="reelsStoryBars" class="reels-story-bars auto-hud" title="Indikator Slide Reels">
+          <!-- Injected via JavaScript based on media count -->
+        </div>
+
+        <!-- Media viewport where active photo / video is rendered -->
+        <div id="mediaContainer" class="media-container">
+          <!-- Dynamic active slide injected here -->
+        </div>
+
+        <!-- Reels Floating Side Action Buttons (Reels Style) -->
+        <div class="reels-side-actions auto-hud">
+          <!-- Sound toggle -->
+          <button id="btnSideMute" class="reels-action-btn" title="Suara Video (M)">
+            <svg id="iconSideSoundOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg id="iconSideSoundMute" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            <span class="action-caption">Audio</span>
+          </button>
+
+          <!-- Play/Pause -->
+          <button id="btnSidePlayPause" class="reels-action-btn" title="Jeda / Putar (Spasi)">
+            <svg id="iconSidePlay" class="hidden" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <svg id="iconSidePause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <span class="action-caption">Status</span>
+          </button>
+
+          <!-- Fit / Fill Scale Toggle -->
+          <button id="btnSideFit" class="reels-action-btn" title="Ubah Skala (Fit / Cover)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            <span class="action-caption" id="sideFitCaption">Fit</span>
+          </button>
+        </div>
+
+        <!-- Reels Bottom Overlay (Title, Description, Badge, Counter) -->
+        <div class="reels-bottom-overlay auto-hud">
+          <div class="reels-meta">
+            <div class="reels-type-badge" id="currentTypePill">
+              <span class="type-icon" id="currentTypeIcon"></span>
+              <span class="type-name" id="currentTypeName">FOTO</span>
+              <span class="reels-counter" id="counterCurrent">01</span>
+              <span class="reels-counter-sep">/</span>
+              <span class="reels-counter-total" id="counterTotal">05</span>
+            </div>
+            <h2 id="currentMediaTitle" class="reels-title">Memuat media display...</h2>
+            <p id="currentMediaDesc" class="reels-desc">Display informasi visual resmi</p>
+          </div>
+        </div>
+
+        <!-- Frame Edge Vignette -->
+        <div class="reels-frame-vignette"></div>
+
+      </div> <!-- /reelsFrame -->
+
+      <!-- Navigation Arrows (Floating beside Reels frame) -->
+      <button id="btnPrevSlide" class="nav-arrow nav-arrow-left auto-hud" aria-label="Media Sebelumnya" title="Sebelumnya (Panah Kiri)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button id="btnNextSlide" class="nav-arrow nav-arrow-right auto-hud" aria-label="Media Berikutnya" title="Berikutnya (Panah Kanan)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <!-- Bottom Floating Display Bar (Additional Control Dock) -->
+      <div id="displayControlsBar" class="display-controls-bar auto-hud">
+        <!-- Play / Pause Button -->
+        <button id="btnPlayPause" class="playback-btn play-pause-btn" title="Jeda / Lanjutkan Slideshow (Spasi)">
+          <svg id="iconPlay" class="hidden" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+
+        <!-- Audio Mute Button -->
+        <button id="btnToggleMute" class="playback-btn mute-btn" title="Aktifkan / Bisukan Suara Video (M)">
+          <svg id="iconSoundOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg id="iconSoundMute" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        </button>
+
+        <!-- Fit / Fill Scale Toggle -->
+        <button id="btnToggleFit" class="playback-btn fit-btn" title="Ubah Skala Tampilan: Fit Layar / Isi Layar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <span class="fit-label" id="fitModeLabel">Fit</span>
+        </button>
+
+        <!-- Single slide timer fill indicator (alternative) -->
+        <div class="slide-timer-track" title="Waktu Slide Berjalan">
+          <div id="slideTimerFill" class="slide-timer-fill"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- GRID GALLERY VIEW (Alternate View for browsing collection) -->
+    <section id="gridGalleryView" class="grid-gallery-view hidden">
+      <div class="gallery-container">
+        <!-- Gallery Filter Toolbar -->
+        <div class="gallery-toolbar">
+          <div class="filter-chips">
+            <button class="chip active" data-filter="all">Semua (<span id="countAll">0</span>)</button>
+            <button class="chip" data-filter="image">Foto Saja (<span id="countPhotos">0</span>)</button>
+            <button class="chip" data-filter="video">Video Saja (<span id="countVideos">0</span>)</button>
+          </div>
+
+          <div class="gallery-toolbar-actions">
+            <button id="btnLaunchSlideshow" class="btn-primary">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Mulai Display Otomatis
+            </button>
+          </div>
+        </div>
+
+        <!-- Gallery Grid Items -->
+        <div id="galleryGrid" class="gallery-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- RUNNING TICKER / MARQUEE (Display Signage Footer) -->
+    <footer id="runningTicker" class="running-ticker auto-hud">
+      <div class="ticker-badge">
+        <span class="ticker-dot"></span>
+        <span class="ticker-label">PENGUMUMAN</span>
+      </div>
+      <div class="ticker-viewport">
+        <div id="tickerContent" class="ticker-text">
+          ✦ Selamat Datang di Layanan Display Informasi Publik ✦ Cek status kelayakan Perlinsos dan gunakan form sanggahan sesuai kebutuhan data Anda ✦ Layanan dibuka setiap hari kerja ✦ Tetap jaga ketertiban dan kenyamanan bersama ✦
+        </div>
+      </div>
+    </footer>
+
+    <!-- IDLE MOUSE HINT (Subtle indicator on how to wake up controls) -->
+    <div id="idleWakeHint" class="idle-wake-hint">
+      <span>Gerakkan kursor atau sentuh layar untuk kontrol</span>
+    </div>
+
+  </div> <!-- /app-container -->
+
+
+  <!-- LIGHTBOX MODAL (For HD single photo/video inspection) -->
+  <div id="lightboxModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-wrapper">
+      <button id="btnCloseLightbox" class="modal-close-btn" title="Tutup (Esc)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <button id="btnLightboxPrev" class="lightbox-nav lightbox-prev" title="Sebelumnya">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button id="btnLightboxNext" class="lightbox-nav lightbox-next" title="Berikutnya">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <div class="lightbox-content-box" id="lightboxContentBox">
+        <!-- Injected single item -->
+      </div>
+
+      <div class="lightbox-info-bar">
+        <div class="lightbox-text">
+          <h3 id="lightboxTitle">Judul Media</h3>
+          <p id="lightboxDesc">Keterangan media</p>
+        </div>
+        <div class="lightbox-actions">
+          <button id="btnLightboxPlayFromHere" class="btn-subtle" title="Mulai Slideshow dari sini">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Tampilkan di Display
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ADD MEDIA MODAL (Upload / Add URL) -->
+  <div id="addMediaModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-backdrop" id="addMediaBackdrop"></div>
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Tambah Foto atau Video Baru</h3>
+          <p>Tambahkan media untuk ditayangkan pada display signage ini</p>
+        </div>
+        <button id="btnCloseAddMedia" class="modal-close-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Tabs: Upload File vs Web URL -->
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" data-tab="uploadTab">Unggah dari Perangkat</button>
+          <button class="modal-tab-btn" data-tab="urlTab">Masukkan URL / Link Web</button>
+        </div>
+
+        <!-- TAB 1: FILE UPLOAD -->
+        <div id="uploadTab" class="tab-pane active">
+          <div class="upload-dropzone" id="uploadDropzone">
+            <input type="file" id="mediaFileInput" accept="image/*,video/mp4,video/webm" multiple class="file-input-hidden">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <h4>Tarik & Letakkan File Foto / Video Di Sini</h4>
+            <p>Mendukung file JPG, PNG, WEBP, MP4, WEBM</p>
+            <button type="button" class="btn-secondary" id="btnBrowseFiles">Pilih File dari Komputer</button>
+          </div>
+          <div class="folder-sync-banner" style="margin-top: 1rem; padding: 0.85rem 1rem; background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <div>
+              <div style="font-weight: 600; font-size: 0.85rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Auto-Sync Folder media/
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;">
+                File baru yang diletakkan di folder <code>media/</code> otomatis tayang di display.
+              </div>
+            </div>
+            <button type="button" id="btnSyncFolderNow" class="btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.75rem; white-space: nowrap;">
+              🔄 Sinkronkan Sekarang
+            </button>
+          </div>
+          <div id="uploadFileListPreview" class="upload-file-preview-list"></div>
+        </div>
+
+        <!-- TAB 2: URL INPUT -->
+        <div id="urlTab" class="tab-pane hidden">
+          <form id="urlMediaForm" class="url-form">
+            <div class="form-group">
+              <label for="urlType">Jenis Media:</label>
+              <select id="urlType" class="form-control">
+                <option value="image">Foto / Gambar (JPG, PNG, WebP)</option>
+                <option value="video">Video (MP4 / WebM Direct URL)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="urlMediaLink">Tautan URL Media:</label>
+              <input type="url" id="urlMediaLink" class="form-control" placeholder="https://example.com/banner-layanan.jpg" required>
+            </div>
+            <div class="form-group">
+              <label for="urlMediaTitle">Judul / Keterangan Singkat:</label>
+              <input type="text" id="urlMediaTitle" class="form-control" placeholder="Contoh: Jadwal Pelayanan Loket Terpadu">
+            </div>
+            <button type="submit" class="btn-primary full-width">Tambahkan ke Antrean Display</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-backdrop" id="settingsBackdrop"></div>
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Pengaturan Tampilan Display</h3>
+          <p>Konfigurasi kecepatan durasi, transisi, dan elemen digital signage</p>
+        </div>
+        <button id="btnCloseSettings" class="modal-close-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body settings-body">
+        <!-- Durasi Foto -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="settingDuration">Durasi Penayangan Foto</label>
+            <span>Waktu tunggu sebelum berpindah ke foto berikutnya</span>
+          </div>
+          <div class="setting-control">
+            <select id="settingDuration" class="form-control">
+              <option value="3000">3 Detik (Cepat)</option>
+              <option value="5000">5 Detik</option>
+              <option value="7000" selected>7 Detik (Rekomendasi)</option>
+              <option value="10000">10 Detik</option>
+              <option value="15000">15 Detik</option>
+              <option value="20000">20 Detik (Santai)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Efek Transisi -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="settingTransition">Efek Transisi Slide</label>
+            <span>Gaya animasi perpindahan antar media</span>
+          </div>
+          <div class="setting-control">
+            <select id="settingTransition" class="form-control">
+              <option value="fade" selected>Halus (Crossfade)</option>
+              <option value="zoom">Ken Burns (Perbesar Lembut)</option>
+              <option value="slide">Geser Sinematik (Slide)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Mode Skala Default -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="settingFitMode">Skala Gambar / Video</label>
+            <span>Cara media disesuaikan dengan layar TV/monitor</span>
+          </div>
+          <div class="setting-control">
+            <select id="settingFitMode" class="form-control">
+              <option value="contain" selected>Fit Penuh (Tanpa Terpotong)</option>
+              <option value="cover">Cover (Isi Seluruh Layar)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Toggle Ticker -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="toggleTickerSwitch">Teks Berjalan (Running Ticker)</label>
+            <span>Tampilkan pengumuman teks berjalan di bagian bawah layar</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="toggleTickerSwitch" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Teks Ticker Custom -->
+        <div class="setting-row vertical-layout">
+          <div class="setting-info">
+            <label for="customTickerInput">Edit Pesan Teks Berjalan</label>
+            <span>Pesan informasi yang akan berjalan di display layar</span>
+          </div>
+          <textarea id="customTickerInput" class="form-control textarea" rows="2">✦ Selamat Datang di Layanan Display Informasi Publik ✦ Cek status kelayakan Perlinsos dan gunakan form sanggahan sesuai kebutuhan data Anda ✦ Layanan dibuka setiap hari kerja ✦ Tetap jaga ketertiban dan kenyamanan bersama ✦</textarea>
+        </div>
+
+        <!-- Toggle Jam Digital -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="toggleClockSwitch">Widget Jam & Tanggal Digital</label>
+            <span>Tampilkan jam digital real-time di sudut atas</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="toggleClockSwitch" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Kelola Urutan Media / Reset -->
+        <div class="setting-section-header">
+          <h4>Daftar & Urutan Media Display</h4>
+          <span class="badge" id="settingsMediaCount">5 Item</span>
+        </div>
+        <div id="settingsMediaList" class="settings-media-list">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="settings-footer-actions">
+          <button id="btnResetMedia" class="btn-danger-outline" title="Kembalikan ke 4 poster & video awal">
+            Reset Media ke Bawaan
+          </button>
+          <button id="btnSaveSettings" class="btn-primary">
+            Simpan & Terapkan
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="toast hidden">
+    <div class="toast-icon"></div>
+    <div class="toast-message" id="toastMessage">Pemberitahuan</div>
+  </div>
+
+  <script id="manifestScript" src="media/manifest.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
